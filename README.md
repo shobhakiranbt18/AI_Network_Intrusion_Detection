@@ -126,7 +126,7 @@ python --version
 From the workspace folder in PowerShell:
 
 ```powershell
-cd "C:\Users\user\Downloads\arss\real time\AI_Network_Intrusion_Detection"
+cd "C:\Users\user\Downloads\AI_Network_Intrusion_Detection"
 ```
 
 Run the following commands from the project folder, where `requirements.txt` is located.
