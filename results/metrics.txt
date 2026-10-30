@@ -1,0 +1,26 @@
+============================================================
+   NETWORK-BASED INTRUSION DETECTION USING DEEP LEARNING
+   Model Evaluation Report
+============================================================
+
+Testing Accuracy : 94.50%
+Precision : 94.67%
+Recall    : 97.40%
+F1-Score  : 96.02%
+ROC-AUC   : 99.00%
+
+Decision threshold: 0.4350
+
+------------------------------------------------------------
+Classification Report:
+
+              precision    recall  f1-score   support
+
+  Normal (0)       0.94      0.88      0.91     16800
+  Attack (1)       0.95      0.97      0.96     35803
+
+    accuracy                           0.95     52603
+   macro avg       0.94      0.93      0.94     52603
+weighted avg       0.94      0.95      0.94     52603
+
+============================================================

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network-Based Intrusion Detection Using Deep Learning</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-dark navbar-expand-lg nids-navbar">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+      <i class="bi bi-shield-lock-fill text-info fs-4"></i>
+      <span>NIDS<span class="text-info">·AI</span></span>
+    </a>
+    <div class="ms-auto d-flex gap-3 align-items-center">
+      <span class="badge {% if model_trained %}bg-success{% else %}bg-warning text-dark{% endif %} px-3 py-2">
+        <i class="bi bi-{% if model_trained %}check-circle{% else %}exclamation-triangle{% endif %}-fill me-1"></i>
+        {% if model_trained %}Model Ready{% else %}Model Not Trained{% endif %}
+      </span>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Flash messages ──────────────────────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── Hero Section ─────────────────────────────────────────────────────────── -->
+<section class="hero-section text-center">
+  <div class="container">
+    <div class="hero-icon-wrap mx-auto mb-4">
+      <i class="bi bi-shield-shaded hero-icon"></i>
+    </div>
+    <h1 class="hero-title">Network-Based Intrusion<br>Detection Using Deep Learning</h1>
+    <p class="hero-subtitle mx-auto">
+      A deep learning-based system for monitoring network traffic and identifying
+      <span class="text-success fw-semibold">Normal</span> and
+      <span class="text-danger fw-semibold">Attack</span> behavior using the UNSW-NB15 dataset.
+    </p>
+
+    {% if model_trained %}
+      <a href="{{ url_for('upload') }}" class="btn btn-glow btn-lg px-5 mt-2">
+        <i class="bi bi-play-circle-fill me-2"></i>Start Prediction
+      </a>
+    {% else %}
+      <div class="alert alert-warning d-inline-block mt-3 px-4 py-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Train the model first:<br>
+        <code class="text-dark">python models/train.py</code>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ── Stats Bar ─────────────────────────────────────────────────────────────── -->
+<section class="stats-bar py-4">
+  <div class="container">
+    <div class="row g-3 justify-content-center text-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="bi bi-cpu-fill text-info"></i></div>
+          <div class="stat-value">DNN</div>
+          <div class="stat-label">Deep Neural Network</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="bi bi-database-fill text-info"></i></div>
+          <div class="stat-value">UNSW-NB15</div>
+          <div class="stat-label">Training Dataset</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="bi bi-layers-fill text-info"></i></div>
+          <div class="stat-value">50</div>
+          <div class="stat-label">Training Epochs</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="bi bi-cpu-fill text-info"></i></div>
+          <div class="stat-value">8</div>
+          <div class="stat-label">Selected Features</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features Section ──────────────────────────────────────────────────────── -->
+<section class="features-section py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">System Features</h2>
+    <div class="row g-4">
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <h5 class="feature-title">Deep Learning Model</h5>
+          <p class="feature-desc">
+            Five-layer DNN with 512→256→128→64→32 neurons, 
+            training for 50 epochs on UNSW-NB15 dataset for binary classification.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-upload"></i>
+          </div>
+          <h5 class="feature-title">CSV File Prediction</h5>
+          <p class="feature-desc">
+            Upload any UNSW-NB15 formatted CSV and receive per-row predictions
+            with confidence scores in seconds.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-bar-chart-fill"></i>
+          </div>
+          <h5 class="feature-title">Classification Metrics</h5>
+          <p class="feature-desc">
+            Comprehensive evaluation metrics: Accuracy, Precision, Recall, F1-Score, 
+            and ROC-AUC with visual Confusion Matrix and ROC Curve plots.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-funnel-fill"></i>
+          </div>
+          <h5 class="feature-title">Feature Selection</h5>
+          <p class="feature-desc">
+            Extra Trees algorithm ranks 42 available traffic features and selects
+            the top 8 most important features using training data.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h5 class="feature-title">Robust Preprocessing</h5>
+          <p class="feature-desc">
+            Training-fitted encoders, MinMax normalization, missing-value
+            imputation, and a fixed 0.50 decision threshold.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon-wrap">
+            <i class="bi bi-hdd-network"></i>
+          </div>
+          <h5 class="feature-title">Localhost Only</h5>
+          <p class="feature-desc">
+            Runs entirely on your machine — no cloud, no Docker, no external
+            dependencies beyond the Python packages in requirements.txt.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── How it Works ──────────────────────────────────────────────────────────── -->
+<section class="how-section py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">How It Works</h2>
+    <div class="row g-0 justify-content-center">
+
+      <div class="col-md-2 text-center step-col">
+        <div class="step-circle">1</div>
+        <div class="step-line d-none d-md-block"></div>
+        <p class="step-label mt-2">Train Model</p>
+        <p class="step-sub">Run train.py on UNSW-NB15 dataset</p>
+      </div>
+
+      <div class="col-md-2 text-center step-col">
+        <div class="step-circle">2</div>
+        <div class="step-line d-none d-md-block"></div>
+        <p class="step-label mt-2">Upload CSV</p>
+        <p class="step-sub">Upload network traffic CSV file</p>
+      </div>
+
+      <div class="col-md-2 text-center step-col">
+        <div class="step-circle">3</div>
+        <div class="step-line d-none d-md-block"></div>
+        <p class="step-label mt-2">Preprocess</p>
+        <p class="step-sub">Encode, scale and select features</p>
+      </div>
+
+      <div class="col-md-2 text-center step-col">
+        <div class="step-circle">4</div>
+        <div class="step-line d-none d-md-block"></div>
+        <p class="step-label mt-2">Predict</p>
+        <p class="step-sub">DNN classifies each traffic row</p>
+      </div>
+
+      <div class="col-md-2 text-center step-col">
+        <div class="step-circle">5</div>
+        <p class="step-label mt-2">Results</p>
+        <p class="step-sub">View predictions and metrics</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────────── -->
+<footer class="nids-footer text-center py-4">
+  <p class="mb-0 text-muted">
+    <i class="bi bi-shield-lock-fill text-info me-1"></i>
+    Network-Based Intrusion Detection Using Deep Learning &nbsp;|&nbsp; UNSW-NB15 Dataset
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

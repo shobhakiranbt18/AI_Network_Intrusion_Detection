@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload CSV – AI NIDS</title>
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────────────── -->
+<nav class="navbar navbar-dark navbar-expand-lg nids-navbar">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+      <i class="bi bi-shield-lock-fill text-info fs-4"></i>
+      <span>NIDS<span class="text-info">·AI</span></span>
+    </a>
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <a href="{{ url_for('index') }}" class="btn btn-outline-info btn-sm">
+        <i class="bi bi-house-fill me-1"></i>Home
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Flash messages ──────────────────────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          <i class="bi bi-exclamation-circle-fill me-2"></i>{{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── Upload Form ───────────────────────────────────────────────────────────── -->
+<section class="upload-section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+
+        <div class="text-center mb-5">
+          <div class="hero-icon-wrap mx-auto mb-3" style="width:70px;height:70px;font-size:2rem;">
+            <i class="bi bi-cloud-upload-fill text-info"></i>
+          </div>
+          <h2 class="page-title">Upload Network Traffic CSV</h2>
+          <p class="text-muted">
+            Upload a CSV file following the <strong>UNSW-NB15</strong> feature format.
+          </p>
+        </div>
+
+        <!-- Upload card -->
+        <div class="upload-card">
+          <form id="uploadForm"
+                action="{{ url_for('predict') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                novalidate>
+
+            <!-- Drop zone -->
+            <div class="drop-zone" id="dropZone">
+              <input type="file"
+                     id="fileInput"
+                     name="file"
+                     accept=".csv"
+                     class="drop-zone__input"
+                     required />
+              <div class="drop-zone__content" id="dropContent">
+                <i class="bi bi-file-earmark-spreadsheet drop-icon"></i>
+                <p class="drop-title">Drag &amp; drop your CSV here</p>
+                <p class="drop-sub">or <span class="text-info">click to browse</span></p>
+                <p class="drop-hint">Only <strong>.csv</strong> files · Max 50 MB</p>
+              </div>
+              <!-- File selected state -->
+              <div class="drop-zone__selected d-none" id="dropSelected">
+                <i class="bi bi-file-earmark-check-fill text-success fs-2"></i>
+                <p class="drop-title mt-2 mb-0" id="selectedName">—</p>
+                <p class="drop-hint mt-1" id="selectedSize">—</p>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger mt-2"
+                        id="clearFile">
+                  <i class="bi bi-x-circle me-1"></i>Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Validation message -->
+            <div class="invalid-feedback d-block mt-2 ps-1" id="fileError" style="display:none!important"></div>
+
+            <!-- Submit -->
+            <div class="text-center mt-4">
+              <button type="submit"
+                      class="btn btn-glow btn-lg px-5"
+                      id="predictBtn"
+                      disabled>
+                <span id="btnText">
+                  <i class="bi bi-cpu-fill me-2"></i>Predict
+                </span>
+                <span id="btnSpinner" class="d-none">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Analysing…
+                </span>
+              </button>
+            </div>
+          </form>
+        </div><!-- /upload-card -->
+
+        <!-- Info accordion -->
+        <div class="accordion mt-4 nids-accordion" id="infoAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#formatInfo">
+                <i class="bi bi-info-circle me-2 text-info"></i>
+                Expected CSV Format
+              </button>
+            </h2>
+            <div id="formatInfo" class="accordion-collapse collapse"
+                 data-bs-parent="#infoAccordion">
+              <div class="accordion-body text-muted small">
+                <p>Your CSV should follow the <strong>UNSW-NB15</strong> feature schema.
+                   The following columns are expected (case-insensitive):</p>
+                <p class="mb-1"><code>dur, proto, service, state, spkts, dpkts, sbytes,
+                dbytes, rate, sttl, dttl, sload, dload, sloss, dloss, sinpkt, dinpkt,
+                sjit, djit, swin, stcpb, dtcpb, dwin, tcprtt, synack, ackdat,
+                smean, dmean, trans_depth, response_body_len, ct_srv_src,
+                ct_state_ttl, ct_dst_ltm, ct_src_dport_ltm, ct_dst_sport_ltm,
+                ct_dst_src_ltm, is_ftp_login, ct_ftp_cmd, ct_flw_http_mthd,
+                ct_src_ltm, ct_srv_dst, is_sm_ips_ports</code></p>
+                <p class="mt-2 mb-0">
+                  <strong>Note:</strong> The <code>id</code>, <code>attack_cat</code>,
+                  and <code>label</code> columns are automatically ignored if present.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#tipInfo">
+                <i class="bi bi-lightbulb me-2 text-info"></i>
+                Tips for Best Results
+              </button>
+            </h2>
+            <div id="tipInfo" class="accordion-collapse collapse"
+                 data-bs-parent="#infoAccordion">
+              <div class="accordion-body text-muted small">
+                <ul class="mb-0">
+                  <li>Use a slice of the original UNSW-NB15 testing CSV for best accuracy.</li>
+                  <li>The first row must be a header row with column names.</li>
+                  <li>Missing values are handled automatically (filled with median/mode).</li>
+                  <li>Rows with all-zero features may be classified as Normal.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div><!-- /accordion -->
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────────── -->
+<footer class="nids-footer text-center py-4">
+  <p class="mb-0 text-muted">
+    <i class="bi bi-shield-lock-fill text-info me-1"></i>
+    Network-Based Intrusion Detection Using Deep Learning &nbsp;|&nbsp; UNSW-NB15 Dataset
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Drop-zone interactivity ────────────────────────────────────────────────
+const dropZone    = document.getElementById("dropZone");
+const fileInput   = document.getElementById("fileInput");
+const dropContent = document.getElementById("dropContent");
+const dropSelected= document.getElementById("dropSelected");
+const selectedName= document.getElementById("selectedName");
+const selectedSize= document.getElementById("selectedSize");
+const clearBtn    = document.getElementById("clearFile");
+const predictBtn  = document.getElementById("predictBtn");
+const uploadForm  = document.getElementById("uploadForm");
+const fileError   = document.getElementById("fileError");
+const btnText     = document.getElementById("btnText");
+const btnSpinner  = document.getElementById("btnSpinner");
+
+function formatBytes(bytes) {
+  if (bytes < 1024)       return bytes + " B";
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(2) + " MB";
+}
+
+function showSelected(file) {
+  selectedName.textContent = file.name;
+  selectedSize.textContent = formatBytes(file.size);
+  dropContent.classList.add("d-none");
+  dropSelected.classList.remove("d-none");
+  predictBtn.disabled = false;
+  fileError.style.display = "none";
+  dropZone.classList.remove("drop-zone--invalid");
+}
+
+function clearSelection() {
+  fileInput.value = "";
+  dropContent.classList.remove("d-none");
+  dropSelected.classList.add("d-none");
+  predictBtn.disabled = true;
+}
+
+// Click to open file picker
+dropZone.addEventListener("click", (e) => {
+  if (e.target === clearBtn || clearBtn.contains(e.target)) return;
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", () => {
+  if (fileInput.files.length > 0) {
+    const f = fileInput.files[0];
+    if (!f.name.endsWith(".csv")) {
+      fileError.textContent = "Only .csv files are accepted.";
+      fileError.style.display = "block";
+      dropZone.classList.add("drop-zone--invalid");
+      clearSelection();
+      return;
+    }
+    showSelected(f);
+  }
+});
+
+clearBtn.addEventListener("click", clearSelection);
+
+// Drag & drop
+dropZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  dropZone.classList.add("drop-zone--over");
+});
+["dragleave", "dragend"].forEach(type =>
+  dropZone.addEventListener(type, () => dropZone.classList.remove("drop-zone--over"))
+);
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("drop-zone--over");
+  const dt = e.dataTransfer;
+  if (dt.files.length > 0) {
+    const f = dt.files[0];
+    if (!f.name.endsWith(".csv")) {
+      fileError.textContent = "Only .csv files are accepted.";
+      fileError.style.display = "block";
+      dropZone.classList.add("drop-zone--invalid");
+      return;
+    }
+    // Assign to input
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(f);
+    fileInput.files = dataTransfer.files;
+    showSelected(f);
+  }
+});
+
+// Show spinner on submit
+uploadForm.addEventListener("submit", (e) => {
+  if (!fileInput.files.length) {
+    e.preventDefault();
+    fileError.textContent = "Please select a CSV file before predicting.";
+    fileError.style.display = "block";
+    return;
+  }
+  btnText.classList.add("d-none");
+  btnSpinner.classList.remove("d-none");
+  predictBtn.disabled = true;
+});
+</script>
+</body>
+</html>

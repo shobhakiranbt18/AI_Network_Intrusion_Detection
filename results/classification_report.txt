@@ -1,0 +1,20 @@
+UNSW-NB15 Test Set Classification Report (30% hold-out)
+Model: Deep Neural Network; Extra Trees selected 43 features
+Training accuracy: 94.76%
+Validation accuracy: 94.61%
+Testing accuracy: 94.50%
+Decision threshold: 0.435 (Optimized)
+Epochs completed: 50/50
+
+              precision    recall  f1-score   support
+
+  Normal (0)     0.9410    0.8832    0.9112     16800
+  Attack (1)     0.9467    0.9740    0.9602     35803
+
+    accuracy                         0.9450     52603
+   macro avg     0.9439    0.9286    0.9357     52603
+weighted avg     0.9449    0.9450    0.9445     52603
+
+Confusion matrix (rows=true, columns=predicted; 0=Normal, 1=Attack):
+[[14837  1963]
+ [  930 34873]]
